@@ -58,6 +58,7 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation("com.google.android.gms:play-services-auth:20.7.0")
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -97,13 +98,41 @@ android {
         }
     }
     buildTypes {
-        getByName("release") {
-            isMinifyEnabled = false
+        release {
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+        debug {
+            // Debug uses default debug keystore
         }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+    signingConfigs {
+        create("release") {
+            storeFile = file("keystore/release.keystore")
+            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "release_password"
+            keyAlias = System.getenv("KEY_ALIAS") ?: "release_alias"
+            keyPassword = System.getenv("KEY_PASSWORD") ?: "key_password"
+        }
+        
+        getByName("debug") {
+            storeFile = file("keystore/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.getByName("release")
+        }
+        debug {
+            signingConfig = signingConfigs.getByName("debug")
+        }
     }
 }
 
@@ -119,6 +148,20 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "com.izcode.law"
             packageVersion = "1.0.0"
+        }
+    }
+}
+
+tasks.register("signingReport") {
+    dependsOn("android")
+    
+    doLast {
+        android.signingConfigs.forEach { config ->
+            println("Signing config: ${config.name}")
+            config.storeFile?.let { file ->
+                println("Keystore: ${file.absolutePath}")
+                // You can add more detailed keystore info here if needed
+            }
         }
     }
 }
