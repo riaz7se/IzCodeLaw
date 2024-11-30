@@ -19,16 +19,22 @@ import izcodelaw.composeapp.generated.resources.google
 import izcodelaw.composeapp.generated.resources.x
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import com.izcode.law.auth.GoogleSignInManager
+import kotlinx.coroutines.launch
 
 @Preview
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: () -> Unit,
+    googleSignInManager: GoogleSignInManager? = null
 ) {
     val viewModel = remember { LoginViewModel() }
     val state by viewModel.state.collectAsState()
 
     var platform by remember { mutableStateOf(getPlatform().name) }
+    var signInError by remember { mutableStateOf<String?>(null) }
+
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(state.isLoginSuccessful) {
         if (state.isLoginSuccessful) {
@@ -123,12 +129,27 @@ fun LoginScreen(
                     }
             )
 
-            Image(painterResource(Res.drawable.google),
+            Image(
+                painterResource(Res.drawable.google),
                 contentDescription = "Google",
                 modifier = Modifier
                     .size(60.dp)
                     .clickable {
-                        //Google clicked
+                        googleSignInManager?.let { manager ->
+                            scope.launch {
+                                try {
+                                    manager.signIn()
+                                        .onSuccess {
+                                            onLoginSuccess()
+                                        }
+                                        .onFailure { e ->
+                                            signInError = e.message
+                                        }
+                                } catch (e: Exception) {
+                                    signInError = e.message
+                                }
+                            }
+                        }
                     }
             )
 
@@ -143,11 +164,11 @@ fun LoginScreen(
 
         }
 
-        state.errorMessage?.let { error ->
-            Spacer(modifier = Modifier.height(8.dp))
+        signInError?.let { error ->
             Text(
                 text = error,
-                color = MaterialTheme.colors.error
+                color = MaterialTheme.colors.error,
+                modifier = Modifier.padding(top = 8.dp)
             )
         }
 

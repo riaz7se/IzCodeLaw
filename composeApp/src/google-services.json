@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "418472165736",
+    "project_id": "izcodelaw",
+    "storage_bucket": "izcodelaw.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:418472165736:android:e480a97783238596d1d6dd",
+        "android_client_info": {
+          "package_name": "com.izcode.law"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "418472165736-o90hsdo3i090c41upb76tn9nc9p725sj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.izcode.law",
+            "certificate_hash": "b5a79e13b45d51bf9e17a5d3a643610464198f8b"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD753apNdtklmcrLSMvYnxZZlpVdilv-lk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
