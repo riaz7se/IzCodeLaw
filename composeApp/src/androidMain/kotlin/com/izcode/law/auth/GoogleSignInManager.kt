@@ -19,7 +19,7 @@ actual class GoogleSignInManager(private val activity: ComponentActivity) {
     private val oneTapClient: SignInClient = Identity.getSignInClient(activity)
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private lateinit var signInLauncher: ActivityResultLauncher<IntentSenderRequest>
-    private var signInContinuation: ((Result<AuthResult>) -> Unit)? = null
+    private var signInContinuation: ((Result<UserProfile>) -> Unit)? = null
     
     private val signInRequest = BeginSignInRequest.builder()
         .setGoogleIdTokenRequestOptions(
@@ -50,7 +50,7 @@ actual class GoogleSignInManager(private val activity: ComponentActivity) {
         }
     }
 
-    actual suspend fun signIn(): Result<AuthResult> = suspendCancellableCoroutine { continuation ->
+    actual suspend fun signIn(): Result<UserProfile> = suspendCancellableCoroutine { continuation ->
         signInContinuation = { result ->
             continuation.resume(result)
         }
@@ -79,13 +79,14 @@ actual class GoogleSignInManager(private val activity: ComponentActivity) {
         val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(firebaseCredential)
             .addOnSuccessListener { authResult ->
-                val result = AuthResult(
+                val result = UserProfile(
                     userId = authResult.user?.uid ?: "",
                     email = authResult.user?.email,
                     displayName = authResult.user?.displayName,
                     photoUrl = authResult.user?.photoUrl?.toString()
                 )
                 signInContinuation?.invoke(Result.success(result))
+                AuthManager.updateUser(result)
             }
             .addOnFailureListener { e ->
                 signInContinuation?.invoke(Result.failure(e))

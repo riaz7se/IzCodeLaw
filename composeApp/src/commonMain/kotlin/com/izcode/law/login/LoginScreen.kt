@@ -11,6 +11,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.touchlab.kermit.Logger
 import com.izcode.law.getPlatform
 import izcodelaw.composeapp.generated.resources.Res
 import izcodelaw.composeapp.generated.resources.appLogo
@@ -20,6 +21,7 @@ import izcodelaw.composeapp.generated.resources.x
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import com.izcode.law.auth.GoogleSignInManager
+import com.izcode.law.auth.state.UserState
 import kotlinx.coroutines.launch
 
 @Preview
@@ -139,8 +141,10 @@ fun LoginScreen(
                             scope.launch {
                                 try {
                                     manager.signIn()
-                                        .onSuccess {
-                                            onLoginSuccess()
+                                        .onSuccess {result ->
+                                            Logger.i { "onLoginSuccess: ${result}" }
+//                                            onLoginSuccess()
+                                            UserState.updateUser(result)
                                         }
                                         .onFailure { e ->
                                             signInError = e.message

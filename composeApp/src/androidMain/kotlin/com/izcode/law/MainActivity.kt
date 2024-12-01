@@ -8,10 +8,11 @@ import com.izcode.law.document.handler.AttachmentHandler
 import com.google.firebase.Firebase
 import com.google.firebase.initialize
 import co.touchlab.kermit.Logger
+import com.izcode.law.auth.state.UserState
 
 class MainActivity : ComponentActivity() {
-    private lateinit var googleSignInManager: GoogleSignInManager
     private lateinit var attachmentHandler: AttachmentHandler
+    private lateinit var googleSignInManager: GoogleSignInManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
