@@ -17,50 +17,30 @@ import com.izcode.law.home.document.repository.DocumentRepository
 
 @Composable
 fun ViewDocumentsTab(
-    onDocumentClick: (Document) -> Unit
-) {
-    var searchQuery by remember { mutableStateOf("") }
-    
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "Documents",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Search TextField
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Search documents...") },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
-            singleLine = true
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Filtered Documents List
-        val filteredDocuments = DocumentRepository.documents.filter { document ->
-            document.title.contains(searchQuery, ignoreCase = true) ||
-            document.clientName.contains(searchQuery, ignoreCase = true)
-        }
-        
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(filteredDocuments) { document ->
-                DocumentItem(
-                    document = document,
-                    onClick = { onDocumentClick(document) }
-                )
+    searchQuery: String,
+    onDocumentClick: (Document) -> Unit) {
+    val documents = DocumentRepository.documents
+    val filteredDocuments = remember(searchQuery, documents) {
+        if (searchQuery.isBlank()) {
+            documents
+        } else {
+            documents.filter { doc ->
+                doc.title.contains(searchQuery, ignoreCase = true) ||
+                doc.clientName.contains(searchQuery, ignoreCase = true)
             }
+        }
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(16.dp)
+    ) {
+        items(filteredDocuments) { document ->
+            DocumentItem(
+                document,
+                onClick = { onDocumentClick(document) }
+            )
         }
     }
 }

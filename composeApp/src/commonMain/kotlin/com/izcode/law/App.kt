@@ -9,6 +9,8 @@ import com.izcode.law.document.handler.AttachmentHandler
 import com.izcode.law.auth.GoogleSignInManager
 import com.izcode.law.auth.state.UserState
 import kotlinx.coroutines.launch
+import com.izcode.law.ui.theme.AppTheme
+import com.izcode.law.profile.UserProfileScreen
 
 @Composable
 fun App(
@@ -18,8 +20,9 @@ fun App(
     val currentUser by UserState.user.collectAsState()
     val isAuthenticated by UserState.isAuthenticated.collectAsState()
     val scope = rememberCoroutineScope()
+    var showProfile by remember { mutableStateOf(false) }
 
-    MaterialTheme {
+    AppTheme {
         if (!isAuthenticated) {
             LoginScreen(
                 onLoginSuccess = {
@@ -29,21 +32,28 @@ fun App(
             )
         } else {
             currentUser?.let { user ->
-                HomeScreen(
-                    attachmentHandler = attachmentHandler,
-                    userProfile = user,
-                    onSignOut = {
-                        scope.launch {
-                            try {
-                                googleSignInManager.signOut()
-                                UserState.clearUser()
-                                Logger.i { "User signed out successfully" }
-                            } catch (e: Exception) {
-                                Logger.e { "Sign out failed: ${e.message}" }
+                if (showProfile) {
+                    UserProfileScreen(
+                        userProfile = user,
+                        onBackPress = { showProfile = false }
+                    )
+                } else {
+                    HomeScreen(
+                        attachmentHandler = attachmentHandler,
+                        userProfile = user,
+                        onSignOut = {
+                            scope.launch {
+                                try {
+                                    googleSignInManager.signOut()
+                                    UserState.clearUser()
+                                } catch (e: Exception) {
+                                    Logger.e { "Sign out failed: ${e.message}" }
+                                }
                             }
-                        }
-                    }
-                )
+                        },
+                        onProfileClick = { showProfile = true }
+                    )
+                }
             }
         }
     }
